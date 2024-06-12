@@ -65,9 +65,9 @@ function generation() {
 	cmake_gen $OPATH;   # arg = source_dir
 
 	if [ "$OPATH" == "MyCProject" ]; then
-		sed -i "s/MYPROGRAM/$OPATH/g" $OPATH/CMakeLists.txt
+		sed -i "s/MYPROGRAM/program/g" $OPATH/CMakeLists.txt
 		sed -i "s/MYSOURCE/main/g" $OPATH/CMakeLists.txt
-		sed -i "s/exe/$OPATH/g" $OPATH/Makefile
+		sed -i "s/exe/program/g" $OPATH/Makefile
 	else
 		sed -i "s/MYPROGRAM/$OPATH/g" $OPATH/CMakeLists.txt
 		sed -i "s/MYSOURCE/$OPATH/g" $OPATH/CMakeLists.txt
