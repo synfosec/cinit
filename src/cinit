@@ -1,0 +1,128 @@
+#!/bin/bash
+
+## CINIT
+# A script for initializing C projects with basic directory structure, Makefile, and CMakeLists.txt
+#
+# Author: synfosec
+# GitHub: https://github.com/synfosec
+#
+#
+
+# imports
+
+##
+
+source "../lib/banner.sh"
+source "../lib/makefile.sh"
+source "../lib/cmake.sh"
+source "../lib/c-setup.sh"
+
+##
+
+function init() {
+	# dir
+	local OPTION=$1;
+
+	if [ -z "$OPTION" ]; then
+		OPTION="MyCProject";
+
+		if [ -d "$OPTION" ]; then
+			rm -rf $OPTION
+			echo -e "\n\e[1;32m+\e[0m \e[1;34mreinitialising c project '$OPTION'\e[0m";
+			mkdir $OPTION;
+			generation $OPTION;
+		else
+			echo -e "\n\e[1;32m+\e[0m \e[1;34minitialising c project '$OPTION'\e[0m";
+			mkdir $OPTION;
+			generation $OPTION;
+		fi;
+	else
+		if [ -d "$OPTION" ]; then
+			echo -e "\n\e[1;32m+\e[0m \e[1;34mreinitialising c project '$OPTION'\e[0m";
+			rm -rf "$OPTION";
+			mkdir "$OPTION";
+			generation $OPTION;
+			mv $OPTION/src/main.c $OPTION/src/$OPTION.c
+		else
+			echo -e "\n\e[1;32m+\e[0m \e[1;34minitialising c project '$OPTION'\e[0m";
+			mkdir "$OPTION";
+			generation $OPTION;
+			mv $OPTION/src/main.c $OPTION/src/$OPTION.c
+		fi;
+	fi;
+};
+
+# handle generation
+
+function generation() {
+	local OPATH=$1;
+
+	mkdir $OPATH/src;
+	echo "/.venv/" > $OPATH/.gitignore
+
+	generate_c $OPATH;  # arg = source_dir
+	makethefile $OPATH; # arg = source_dir
+	cmake_gen $OPATH;   # arg = source_dir
+
+	if [ "$OPATH" == "MyCProject" ]; then
+		sed -i "s/MYPROGRAM/$OPATH/g" $OPATH/CMakeLists.txt
+		sed -i "s/MYSOURCE/main/g" $OPATH/CMakeLists.txt
+		sed -i "s/exe/$OPATH/g" $OPATH/Makefile
+	else
+		sed -i "s/MYPROGRAM/$OPATH/g" $OPATH/CMakeLists.txt
+		sed -i "s/MYSOURCE/$OPATH/g" $OPATH/CMakeLists.txt
+		sed -i "s/exe/$OPATH/g" $OPATH/Makefile
+	fi
+};
+
+# check for args
+
+for arg in "$@"
+do
+	case $arg in
+		-h|--help)
+
+			banner;
+			exit 0;
+
+			;;
+		-v|--version)
+			banner;
+			echo -e "\ncinit0.0.1\n";
+
+			exit 0;
+
+			;;
+
+		init|i)
+			if [ "$#" -lt 2 ]; then
+				banner;
+				echo -e "\n[ ERROR ] - Needs project name as argument\n";
+				exit 1;
+			elif [ "$#" -gt 3 ]; then
+				banner;
+				echo -e "\n[ ERROR ] - Too many arguments. Need only project name\n";
+				exit 1;
+			else
+				init $2;
+
+				echo -e "\e[1;32m+\e[0m \e[1;34msuccessfully initialised c project\e[0m";
+
+				exit 0;
+			fi
+
+			;;
+		*)
+			banner;
+			echo -e "\n[ ERROR ] - unknown command!\n";
+			exit 1;
+			
+			;;
+	esac;
+done;
+
+# if no init
+
+init $1;
+echo -e "\e[1;32m+\e[0m \e[1;34msuccessfully initialised c project\e[0m";
+exit 0;
